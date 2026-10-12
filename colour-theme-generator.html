@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Brand Colour Theme Generator</title>
+    <style>
+      :root {
+        /* Base brand colour */
+        --brand-primary: #3b82f6;
+
+        /* --- Light Mode Derived Colours --- */
+        --light-primary: var(--brand-primary);
+        --light-secondary: color-mix(in srgb, var(--brand-primary) 70%, white);
+        --light-tertiary: color-mix(in srgb, var(--brand-primary) 40%, white);
+        --light-accent: color-mix(in srgb, var(--brand-primary) 100%, #f59e0b);
+        --light-neutral-bg: color-mix(
+          in srgb,
+          var(--brand-primary) 4%,
+          #fbfbfb
+        );
+        --light-neutral-text: color-mix(
+          in srgb,
+          var(--brand-primary) 20%,
+          #111111
+        );
+
+        /* --- Dark Mode Derived Colours --- */
+        /* Primary is lightened slightly for better contrast on dark backgrounds */
+        --dark-primary: color-mix(in srgb, var(--brand-primary) 85%, white);
+        --dark-secondary: color-mix(in srgb, var(--brand-primary) 60%, black);
+        --dark-tertiary: color-mix(in srgb, var(--brand-primary) 35%, black);
+        --dark-accent: color-mix(in srgb, var(--brand-primary) 90%, #fbbf24);
+        --dark-neutral-bg: color-mix(in srgb, var(--brand-primary) 8%, #121212);
+        --dark-neutral-text: color-mix(
+          in srgb,
+          var(--brand-primary) 10%,
+          #ececec
+        );
+      }
+      /*
+    Create a hover state by mixing your base color with white (to lighten) or black (to darken) depending on the context. For example:
+    Darken (e.g., for light buttons):background-color: color-mix(in srgb, var(--base-color), black 10%);
+    Lighten (e.g., for dark buttons):background-color: color-mix(in srgb, var(--base-color), white 15%);
+
+    Another possible approach is to generate precise dark mode swatches by simulating the CSS color-mix(in srgb, brand 85%, white)
+    Or from dark to light mode with rgb: color-mix(in rgb, var(--brand) 85%, black);
+
+
+    NOTE ALSO for example: 
+    --color-primary: #4D84F4;
+    --color-primary-light: color-mod(var(--color-primary) tint(15%));
+    --color-primary-dark: color-mod(var(--color-primary) shade(15%));
+    --color-primary-bg: color-mod(var(--color-primary) alpha(20%));
+
+    --color-accent: #f5414f;
+    --color-accent-light: color-mod(var(--color-accent) tint(15%));
+    --color-accent-dark: color-mod(var(--color-accent) shade(10%));
+    --color-accent-bg: color-mod(var(--color-accent) alpha(20%));
+    */
+
+      /* Base Reset & Typography */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        background-color: #f4f4f5;
+        color: #18181b;
+        margin: 0;
+        padding: 2rem;
+        line-height: 1.5;
+      }
+
+      /* Layout */
+      .container {
+        max-width: 1000px;
+        margin: 0 auto;
+      }
+      header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+      h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        color: #111;
+      }
+      p.subtitle {
+        color: #52525b;
+        font-size: 1.1rem;
+      }
+
+      /* Controls */
+      .controls {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow:
+          0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+      }
+      .input-group {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      label {
+        font-weight: 600;
+        color: #3f3f46;
+      }
+      input[type="color"] {
+        -webkit-appearance: none;
+        border: none;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        cursor: pointer;
+        padding: 0;
+        overflow: hidden;
+        box-shadow: 0 0 0 2px #e4e4e7;
+      }
+      input[type="color"]::-webkit-color-swatch-wrapper {
+        padding: 0;
+      }
+      input[type="color"]::-webkit-color-swatch {
+        border: none;
+        border-radius: 50%;
+      }
+      input[type="text"] {
+        padding: 0.75rem 1rem;
+        font-size: 1.1rem;
+        font-family: monospace;
+        border: 1px solid #d4d4d8;
+        border-radius: 8px;
+        width: 120px;
+        text-transform: uppercase;
+      }
+
+      /* Palette Grid */
+      .palette-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+      @media (min-width: 768px) {
+        .palette-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      .mode-section {
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      }
+      .mode-section h2 {
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      /* Light Mode Container */
+      .mode-light {
+        background: var(--light-neutral-bg);
+        color: var(--light-neutral-text);
+        border: 1px solid #e4e4e7;
+      }
+
+      /* Dark Mode Container */
+      .mode-dark {
+        background: var(--dark-neutral-bg);
+        color: var(--dark-neutral-text);
+        border: 1px solid #3f3f46;
+      }
+
+      /* Swatches */
+      .swatch {
+        display: flex;
+        align-items: stretch;
+        margin-bottom: 1rem;
+        border-radius: 10px;
+        overflow: hidden;
+        background: rgba(128, 128, 128, 0.05);
+        border: 1px solid rgba(128, 128, 128, 0.1);
+      }
+      .swatch:last-child {
+        margin-bottom: 0;
+      }
+      .color-block {
+        width: 100px;
+        flex-shrink: 0;
+      }
+      .info {
+        padding: 1rem 1.25rem;
+        flex: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .role-name {
+        font-weight: 600;
+        font-size: 1.05rem;
+      }
+      .hex-value {
+        font-family: monospace;
+        font-size: 1rem;
+        opacity: 0.8;
+      }
+
+      /* Linking blocks to CSS vars */
+      .mode-light .swatch-primary .color-block {
+        background-color: var(--light-primary);
+      }
+      .mode-light .swatch-secondary .color-block {
+        background-color: var(--light-secondary);
+      }
+      .mode-light .swatch-tertiary .color-block {
+        background-color: var(--light-tertiary);
+      }
+      .mode-light .swatch-accent .color-block {
+        background-color: var(--light-accent);
+      }
+      .mode-light .swatch-neutral-bg .color-block {
+        background-color: var(--light-neutral-bg);
+      }
+      .mode-light .swatch-neutral-text .color-block {
+        background-color: var(--light-neutral-text);
+      }
+
+      .mode-dark .swatch-primary .color-block {
+        background-color: var(--dark-primary);
+      }
+      .mode-dark .swatch-secondary .color-block {
+        background-color: var(--dark-secondary);
+      }
+      .mode-dark .swatch-tertiary .color-block {
+        background-color: var(--dark-tertiary);
+      }
+      .mode-dark .swatch-accent .color-block {
+        background-color: var(--dark-accent);
+      }
+      .mode-dark .swatch-neutral-bg .color-block {
+        background-color: var(--dark-neutral-bg);
+        border-right: 1px solid #333;
+      }
+      .mode-dark .swatch-neutral-text .color-block {
+        background-color: var(--dark-neutral-text);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Colour Theme Generator</h1>
+        <p class="subtitle">
+          Enter a brand Hex colour to instantly generate a robust UI palette.
+        </p>
+      </header>
+
+      <section class="controls">
+        <div class="input-group">
+          <label for="brand-picker">Brand Colour:</label>
+          <input type="color" id="brand-picker" value="#3B82F6" />
+          <input type="text" id="brand-hex" value="#3B82F6" maxlength="7" />
+        </div>
+      </section>
+
+      <main class="palette-grid">
+        <!-- Light Mode Section -->
+        <section class="mode-section mode-light">
+          <h2>☀️ Light Mode</h2>
+
+          <article class="swatch swatch-primary">
+            <div class="color-block"></div>
+            <div class="info">
+              <span class="role-name">Primary</span>
+              <span class="hex-value"></span>
+            </div>
+          </article>
+
+          <article class="swatch swatch-secondary">
+            <div class="color-block"></div>
+            <div class="info">
+              <span class="role-name">Secondary</span>
+              <span class="hex-value"></span>
+            </div>
+          </article>
+
+          <article class="swatch swatch-tertiary">
+            <div class="color-block"></div>
+            <div class="info">
+              <span class="role-name">Tertiary</span>
+              <span class="hex-value"></span>
+            </div>
+          </article>
+
+          <article class="swatch swatch-accent">
+            <div class="color-block"></div>
+            <div class="info">
+              <span class="role-name">Accent</span>
+              <span class="hex-value"></span>
+            </div>
+          </article>
+
+          <article class="swatch swatch-neutral-bg">
+            <div class="color-block"></div>
+            <div class="info">
+              <span class="role-name">Neutral Background</span>
+              <span class="hex-value"></span>
+            </div>
+          </article>
+
+          <article class="swatch swatch-neutral-text">
+            <div class="color-block"></div>
+            <div class="info">
+              <span class="role-name">Neutral Text</span>
+              <span class="hex-value"></span>
+            </div>
+          </article>
+        </section>
+
+        <!-- Dark Mode Section -->
+        <section class="mode-section mode-dark">
+          <h2>🌙 Dark Mode</h2>
+
+          <article class="swatch swatch-primary">
+            <div class="color-block"></div>
+            <div class="info">
+              <span class="role-name">Primary</span>
+              <span class="hex-value"></span>
+            </div>
+          </article>
+
+          <article class="swatch swatch-secondary">
+            <div class="color-block"></div>
+            <div class="info">
+              <span class="role-name">Secondary</span>
+              <span class="hex-value"></span>
+            </div>
+          </article>
+
+          <article class="swatch swatch-tertiary">
+            <div class="color-block"></div>
+            <div class="info">
+              <span class="role-name">Tertiary</span>
+              <span class="hex-value"></span>
+            </div>
+          </article>
+
+          <article class="swatch swatch-accent">
+            <div class="color-block"></div>
+            <div class="info">
+              <span class="role-name">Accent</span>
+              <span class="hex-value"></span>
+            </div>
+          </article>
+
+          <article class="swatch swatch-neutral-bg">
+            <div class="color-block"></div>
+            <div class="info">
+              <span class="role-name">Neutral Background</span>
+              <span class="hex-value"></span>
+            </div>
+          </article>
+
+          <article class="swatch swatch-neutral-text">
+            <div class="color-block"></div>
+            <div class="info">
+              <span class="role-name">Neutral Text</span>
+              <span class="hex-value"></span>
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      /**
+       * Converts a computed RGB string into a standard Hex colour string.
+       */
+      function rgbToHex(rgbStr) {
+        const match = rgbStr.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+        if (!match) return rgbStr; // Fallback if parsing fails
+
+        const r = parseInt(match[1]).toString(16).padStart(2, "0");
+        const g = parseInt(match[2]).toString(16).padStart(2, "0");
+        const b = parseInt(match[3]).toString(16).padStart(2, "0");
+
+        return `#${r}${g}${b}`.toUpperCase();
+      }
+
+      /**
+       * Reads the computed background colour of each swatch generated by CSS 'color-mix'
+       * and updates the text label to show the resulting Hex code to the user.
+       */
+      function updateHexLabels() {
+        document.querySelectorAll(".swatch").forEach((swatch) => {
+          const colorBlock = swatch.querySelector(".color-block");
+          const hexLabel = swatch.querySelector(".hex-value");
+
+          // Read what the browser actually rendered after evaluating color-mix()
+          const bgColor = window.getComputedStyle(colorBlock).backgroundColor;
+          hexLabel.textContent = rgbToHex(bgColor);
+        });
+      }
+
+      const colorPicker = document.getElementById("brand-picker");
+      const hexInput = document.getElementById("brand-hex");
+      const root = document.documentElement;
+
+      /**
+       * Injects the new root brand colour into CSS and triggers the label update.
+       */
+      function updateTheme(hexString) {
+        // Update the CSS Custom Property
+        root.style.setProperty("--brand-primary", hexString);
+
+        // Sync inputs
+        colorPicker.value = hexString;
+        hexInput.value = hexString.toUpperCase();
+
+        // We use double requestAnimationFrame to ensure the browser has
+        // painted the new color-mix() values before we try to read them.
+        requestAnimationFrame(() => {
+          requestAnimationFrame(updateHexLabels);
+        });
+      }
+
+      // Event Listeners
+      colorPicker.addEventListener("input", (e) => {
+        updateTheme(e.target.value);
+      });
+
+      hexInput.addEventListener("input", (e) => {
+        const val = e.target.value;
+        // Basic validation for full hex codes
+        if (/^#[0-9A-F]{6}$/i.test(val)) {
+          updateTheme(val);
+        }
+      });
+
+      // Run once on load to populate the initial hex labels
+      updateHexLabels();
+    </script>
+  </body>
+</html>

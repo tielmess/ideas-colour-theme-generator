@@ -2,9 +2,7 @@
 
 A lightweight, zero-dependency colour palette and theme generator built with semantic HTML, modern vanilla CSS, and pragmatic JavaScript. Generate accessible theme pairings and export ready-to-use CSS custom properties for your design token system.
 
-[Live Demo](https://trudymessingham.co.uk/playground/colour-theme-generato/) • [Tutorials & Guides](https://trudymessingham.co.uk/tutorials/) • [Bug Reports](https://github.com/tielmess/ideas-colour-theme-generator/issues)
-
----
+## [Live Demo](https://trudymessingham.co.uk/playground/colour-theme-generato/) • [Tutorials & Guides](https://trudymessingham.co.uk/tutorials/)
 
 ## Overview
 
